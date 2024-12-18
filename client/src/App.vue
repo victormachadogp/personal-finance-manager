@@ -1,8 +1,3 @@
-<script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
   <header>
     <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
@@ -15,10 +10,37 @@ import HelloWorld from './components/HelloWorld.vue'
         <RouterLink to="/about">About</RouterLink>
       </nav>
     </div>
+
+    
+    {{transactions}}
   </header>
+
+  
 
   <RouterView />
 </template>
+
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { RouterLink, RouterView } from 'vue-router'
+import HelloWorld from './components/HelloWorld.vue'
+import { transactionService } from './services/transactionService'
+import type { Transaction } from './types/Transaction'
+
+const transactions = ref<Transaction[]>([])
+
+const fetchTransactions = async () => {
+  try {
+    transactions.value = await transactionService.fetchTransactions()
+  } catch (error) {
+    console.error('Error loading transactions:', error)
+  }
+}
+
+onMounted(() => {
+  fetchTransactions()
+})
+</script>
 
 <style scoped>
 header {
