@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import TheWelcome from '../components/TheWelcome.vue'
+
 </script>
 
 <template>
-  <main>
-    <TheWelcome />
+  <main class="flex justify-center mt-5 text-2xl">
+    Homeview content
   </main>
 </template>
