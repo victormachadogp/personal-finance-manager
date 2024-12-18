@@ -12,6 +12,7 @@ pytest = "^8.3.4"
 fastapi = {extras = ["standard"], version = "^0.115.6"}
 sqlmodel = "^0.0.22"
 shortuuid = "^1.0.13"
+mypy = "^1.13.0"
 
 
 [build-system]
