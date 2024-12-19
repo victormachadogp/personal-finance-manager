@@ -6,7 +6,7 @@ CategoryMapping = Dict[str, List[str]]
 
 
 class CategorizationService:
-    def __init__(self, categories_mapping: CategoryMapping) -> Optional[str]:
+    def __init__(self, categories_mapping: CategoryMapping):
         self.categories_mapping = categories_mapping
 
     def categorize_transaction(self, transaction: Transaction, source_category: Optional[str] = None) -> Optional[str]:
