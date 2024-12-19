@@ -13,3 +13,7 @@ def get_transactions(finance_service: FinanceService = Depends(finance_service))
 @router.get("/categories")
 def get_categories(finance_service: FinanceService = Depends(finance_service)):
     return finance_service.get_categories()
+
+@router.get("/categories/analytics")
+def get_analytics(finance_service: FinanceService = Depends(finance_service)):
+    return finance_service.get_category_analytics()

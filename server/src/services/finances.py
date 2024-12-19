@@ -1,4 +1,5 @@
-from sqlmodel import Session, select
+from pydantic import BaseModel
+from sqlmodel import SQLModel, Session, select
 from src.models import Account, Category, Transaction
 from datetime import datetime
 from decimal import Decimal
@@ -7,6 +8,16 @@ from typing import Optional, Sequence
 """
 TODO: Service is returning ORM objects, should return DTOs instead
 """
+
+
+class CategoryAnalytics(SQLModel):
+    category_id: str
+    total: Decimal
+
+
+class CategoryAnalyticsRespose(BaseModel):
+    categories: list[CategoryAnalytics]
+    total: Decimal
 
 
 class FinanceService:
@@ -56,3 +67,22 @@ class FinanceService:
 
     def get_categories(self) -> Sequence[Category]:
         return self.session.exec(select(Category)).all()
+
+    def get_category_analytics(self) -> CategoryAnalyticsRespose:
+        from sqlalchemy.sql import func
+
+        statement = (
+            select(
+                Category.id,  # Select the category title
+                func.sum(Transaction.amount).label("total"),  # Sum of transaction amounts
+            )
+            .join(Category, Category.id == Transaction.category_id)  # Join Transaction and Category on category_id
+            .group_by(Category.title)  # Group by category title
+        )
+
+        results = self.session.exec(statement).all()  # Execute the query
+
+        # Convert the results to instances of CategoryAnalytics
+        analytics = [CategoryAnalytics(category_id=row.id, total=row.total) for row in results]
+
+        return CategoryAnalyticsRespose(categories=analytics, total=sum([a.total for a in analytics]))

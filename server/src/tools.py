@@ -52,11 +52,22 @@ def data_to_transaction(data, account_id: str, column_mapper: ColumnMapper):
 @click.argument("title", type=str)
 @click.argument("amount", type=str)
 @click.argument("date_format", type=str)
-def load_csv(file_path: str, account_id: str, date: str, title: str, amount: str, date_format: str):
+@click.argument("category", type=str, required=False)
+def load_csv(
+    file_path: str,
+    account_id: str,
+    date: str,
+    title: str,
+    amount: str,
+    date_format: str,
+    category: Optional[str] = None,
+):
     """
     Load a CSV file from the given FILE_PATH and display its contents.
     """
-    column_mapper = ColumnMapper(date=date, description=title, amount=amount, date_format=date_format)
+    column_mapper = ColumnMapper(
+        date=date, description=title, amount=amount, date_format=date_format, category=category
+    )
     # print(column_mapper)
     import_data(file_path, account_id, column_mapper)
 
