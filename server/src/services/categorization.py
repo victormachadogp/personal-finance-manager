@@ -9,11 +9,12 @@ class CategorizationService:
     def __init__(self, categories_mapping: CategoryMapping) -> Optional[str]:
         self.categories_mapping = categories_mapping
 
-    def categorize_transaction(self, transaction: Transaction):
+    def categorize_transaction(self, transaction: Transaction, source_category: Optional[str] = None) -> Optional[str]:
         # 1. User-defined rules
 
+        # 2A. Predefined rules: by category
+        return fuzzy_categorize(source_category or transaction.description, self.categories_mapping)
         # 2A. Predefined rules: by merchant
-        return fuzzy_categorize(transaction.description, self.categories_mapping)
         # 2B. Predefined rules: by details
         # 3. Embeddings and Vectors
         # 4. LLM model

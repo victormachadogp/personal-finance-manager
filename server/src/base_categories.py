@@ -23,6 +23,26 @@ CASH = Category(id="RDrzJ8BzASa6yNgecSPSfF", title="Cash", icon="currency-pound"
 INCOME = Category(id="jHC68t25b7qtqkUQq4Ny3C", title="Income", icon="currency-dollar", color="#228B22")
 EXCLUDED = Category(id="djwbVbfUrL2K5xFVutSq2v", title="Excluded", icon="eye-slash", color="#0000FF")
 
+all_categories = [
+    GENERAL,
+    TRANSPORT,
+    HOUSING,
+    GROCERIES,
+    SHOPPING,
+    BILLS,
+    ENTERTAINMENT,
+    EATING_OUT,
+    CHARITY,
+    PERSONAL_CARE,
+    BUSINESS,
+    FAMILY,
+    EDUCATION,
+    INVESTMENTS,
+    HOLIDAYS,
+    CASH,
+    INCOME,
+    EXCLUDED,
+]
 
 """
 Base mapping of categories to keywords
@@ -39,7 +59,6 @@ category_mapping = {
     CHARITY.id: ["charity", "donation"],
     PERSONAL_CARE.id: ["personal care", "pharmacy", "haircut", "beauty"],
     EDUCATION.id: ["education"],
-
 }
 
 mapping = {
