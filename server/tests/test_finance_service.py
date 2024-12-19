@@ -1,30 +1,23 @@
-import pytest
-from sqlmodel import Session, create_engine, SQLModel
-from services import FinanceService
+from sqlmodel import Session
+from services.finances import FinanceService
 from datetime import datetime
 from decimal import Decimal
 
-@pytest.fixture
-def session():
-    engine = create_engine("sqlite:///:memory:")
-    SQLModel.metadata.create_all(engine)
-    with Session(engine) as session:
-        yield session
 
-def test_create_account(session):
-    service = FinanceService(session)
+def test_create_account(db_session: Session):
+    service = FinanceService(db_session)
     account = service.create_account(name="Test Account")
     assert account.id is not None
     assert account.name == "Test Account"
 
-def test_create_category(session):
-    service = FinanceService(session)
+def test_create_category(db_session: Session):
+    service = FinanceService(db_session)
     category = service.create_category(title="Test Category", icon="bookmark")
     assert category.id is not None
     assert category.title == "Test Category"
 
-def test_create_transaction(session):
-    service = FinanceService(session)
+def test_create_transaction(db_session: Session):
+    service = FinanceService(db_session)
 
     account = service.create_account(name="Test Account")
     category = service.create_category(title="Test Category", icon="bookmark")
