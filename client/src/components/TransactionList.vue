@@ -1,5 +1,5 @@
 <template>
-    <div class="w-full">
+    <div class="w-[80%]">
       <div v-if="isLoading" class="loading">Loading...</div>
       <div v-else-if="error" class="error">{{ error }}</div>
       
