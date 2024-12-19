@@ -1,6 +1,7 @@
 from sqlmodel import Field, SQLModel, Relationship
 from typing import Optional
 from datetime import datetime
+
 # from enum import Enum
 import shortuuid
 from decimal import Decimal
@@ -14,7 +15,7 @@ class Category(SQLModel, table=True):
     id: Optional[str] = Field(default_factory=generate_id, primary_key=True)
     title: str = Field(index=True)
     icon: str
-    color: str = Field(default="#000000") 
+    color: str = Field(default="#000000")
 
 
 class Merchant(SQLModel, table=True):
@@ -40,7 +41,7 @@ class Transaction(SQLModel, table=True):
     description: str
     amount: Decimal = Field(..., decimal_places=2)
     notes: Optional[str] = Field(default=None)
-    category_id: int = Field(foreign_key="category.id")
+    category_id: Optional[int] = Field(default=None, foreign_key="category.id")
     merchant_id: Optional[str] = Field(default=None, foreign_key="merchant.id")
     account_id: int = Field(foreign_key="account.id")
     # type: TransactionType
