@@ -1,5 +1,5 @@
 <template>
-  <div class=" sm:w-9/12 lg:w-7/12 xl:w-5/12 mx-auto">
+  <div class=" ">
   <header class="">
 
       <nav class="flex justify-center gap-5">
