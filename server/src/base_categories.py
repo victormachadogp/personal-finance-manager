@@ -27,9 +27,22 @@ EXCLUDED = Category(id="djwbVbfUrL2K5xFVutSq2v", title="Excluded", icon="eye-sla
 """
 Base mapping of categories to keywords
 """
+category_mapping = {
+    GROCERIES.id: ["groceries", "supermarket"],
+    SHOPPING.id: ["shopping", "department stores", "retail", "online purchases", "clothing stores"],
+    HOLIDAYS.id: ["travel", "holiday", "flight", "hotel"],
+    TRANSPORT.id: ["transport", "rail", "fuel", "parking"],
+    EATING_OUT.id: ["restaurants", "eating out", "takeaway"],
+    ENTERTAINMENT.id: ["entertainment"],
+    HOUSING.id: ["rent", "mortgage", "utilities", "furnishing"],
+    BILLS.id: ["bills", "utilities", "council tax"],
+    CHARITY.id: ["charity", "donation"],
+    PERSONAL_CARE.id: ["personal care", "pharmacy", "haircut", "beauty"],
+    EDUCATION.id: ["education"],
+
+}
 
 mapping = {
-    GENERAL.id: ["General"],
     TRANSPORT.id: ["Transport", "Uber", "Rail Services"],
     HOUSING.id: ["Rent", "Mortgage", "Utilities"],
     GROCERIES.id: ["Tesco", "Supermarket"],
@@ -39,4 +52,5 @@ mapping = {
     EATING_OUT.id: ["Eating Out", "Restaurants", "Takeaway"],
     CHARITY.id: ["Charity", "Donation"],
     PERSONAL_CARE.id: ["Personal Care", "Pharmacy", "Haircut", "Beauty"],
+    GENERAL.id: ["General"],
 }

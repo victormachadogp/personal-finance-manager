@@ -1,5 +1,5 @@
 from sqlmodel import Session
-from services.finances import FinanceService
+from src.services.finances import FinanceService
 from datetime import datetime
 from decimal import Decimal
 
