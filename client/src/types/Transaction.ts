@@ -7,3 +7,8 @@ export interface Transaction {
   category_id: string
   merchant_id: string | null
 }
+export interface Category {
+  id: string
+  name: string
+  color: string
+}
