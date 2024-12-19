@@ -1,17 +1,18 @@
 <template>
-  <main class="flex flex-col pt-5 bg-[#EBEDF0]">
-    
-    <PeriodNavigator class="mb-10" />
-      
-      <div class="flex justify-between">
-
+  <main class="w-4/5 mx-auto grid grid-cols-2 pt-5 bg-[#EBEDF0]">
+    <div class="flex flex-col justify-between grid-span-1">
+        <PeriodNavigator class="mb-10" />
         <TransactionList />
+      </div>
+      <div class="grid-span-1">
+        <AnalyticsSummary />
       </div>
 
   </main>
 </template>
 
 <script setup lang="ts">
+import AnalyticsSummary from '../components/AnalyticsSummary.vue';
 import PeriodNavigator from '../components/PeriodNavigator.vue';
 import TransactionList from '../components/TransactionList.vue';
 </script>
