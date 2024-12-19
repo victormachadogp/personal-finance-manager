@@ -62,14 +62,14 @@ category_mapping = {
 }
 
 mapping = {
-    TRANSPORT.id: ["Transport", "Uber", "Rail Services"],
-    HOUSING.id: ["Rent", "Mortgage", "Utilities"],
-    GROCERIES.id: ["Tesco", "Supermarket"],
-    SHOPPING.id: ["Shopping", "Amazon", "eBay"],
-    BILLS.id: ["Bills", "Utilities", "Council Tax"],
-    ENTERTAINMENT.id: ["Entertainment", "Netflix", "Spotify"],
-    EATING_OUT.id: ["Eating Out", "Restaurants", "Takeaway"],
-    CHARITY.id: ["Charity", "Donation"],
-    PERSONAL_CARE.id: ["Personal Care", "Pharmacy", "Haircut", "Beauty"],
-    GENERAL.id: ["General"],
+    TRANSPORT.id: ["transport", "uber", "rail services"],
+    HOUSING.id: ["rent", "mortgage", "utilities"],
+    GROCERIES.id: ["tesco", "supermarket"],
+    SHOPPING.id: ["shopping", "amazon", "ebay"],
+    BILLS.id: ["bills", "utilities", "council tax"],
+    ENTERTAINMENT.id: ["entertainment", "netflix", "spotify"],
+    EATING_OUT.id: ["eating out", "restaurants", "takeaway"],
+    CHARITY.id: ["charity", "donation"],
+    PERSONAL_CARE.id: ["personal care", "pharmacy", "haircut", "beauty"],
+    GENERAL.id: ["general"],
 }

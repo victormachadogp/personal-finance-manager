@@ -1,8 +1,8 @@
-from sqlmodel import Session
+from sqlmodel import Session, select
 from src.models import Account, Category, Transaction
 from datetime import datetime
 from decimal import Decimal
-from typing import Optional
+from typing import Optional, Sequence
 
 """
 TODO: Service is returning ORM objects, should return DTOs instead
@@ -50,3 +50,9 @@ class FinanceService:
         self.session.commit()
         self.session.refresh(transaction)
         return transaction
+
+    def get_transactions(self) -> Sequence[Transaction]:
+        return self.session.exec(select(Transaction)).all()
+
+    def get_categories(self) -> Sequence[Category]:
+        return self.session.exec(select(Category)).all()

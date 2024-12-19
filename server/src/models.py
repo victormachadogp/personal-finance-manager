@@ -1,4 +1,4 @@
-from sqlmodel import Field, SQLModel, Relationship
+from sqlmodel import Field, SQLModel
 from typing import Optional
 from datetime import datetime
 
@@ -44,7 +44,7 @@ class Transaction(SQLModel, table=True):
     category_id: Optional[int] = Field(default=None, foreign_key="category.id")
     merchant_id: Optional[str] = Field(default=None, foreign_key="merchant.id")
     account_id: int = Field(foreign_key="account.id")
-    # type: TransactionType
+    # type_: TransactionType
     # category: Category = Relationship(back_populates="transactions")
     # merchant: Optional[Merchant] = Relationship(back_populates="transactions")
     # account: Account = Relationship(back_populates="transactions")
