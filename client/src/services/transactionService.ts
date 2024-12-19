@@ -1,21 +1,54 @@
-import type { Transaction } from '@/types/Transaction'
+import { ref, computed } from 'vue'
+import type { Transaction, Category } from '../types/Transaction'
 
-const BASE_URL = 'http://localhost:3001'
+const BASE_URL = 'http://localhost:3000'
 
-export const transactionService = {
-  async fetchTransactions(): Promise<Transaction[]> {
+export function useTransactions() {
+  const transactions = ref<Transaction[]>([])
+  const categories = ref<Category[]>([])
+  const isLoading = ref(false)
+  const error = ref<string | null>(null)
+
+  const fetchTransactions = async () => {
+    isLoading.value = true
     try {
       const response = await fetch(`${BASE_URL}/transactions`)
-
-      if (!response.ok) {
-        throw new Error(`Error HTTP! status: ${response.status}`)
-      }
-
-      const data = await response.json()
-      return data
-    } catch (error) {
-      console.error('Error retrieving transactions:', error)
-      throw error
+      transactions.value = await response.json()
+    } catch (e) {
+      error.value = 'Failed to fetch transactions'
+    } finally {
+      isLoading.value = false
     }
-  },
+  }
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/categories`)
+      categories.value = await response.json()
+    } catch (e) {
+      error.value = 'Failed to fetch categories'
+    }
+  }
+
+  const groupedTransactions = computed(() => {
+    const groups: Record<string, Transaction[]> = {}
+    transactions.value.forEach((transaction) => {
+      const date = transaction.date
+      if (!groups[date]) {
+        groups[date] = []
+      }
+      groups[date].push(transaction)
+    })
+    return groups
+  })
+
+  return {
+    transactions,
+    categories,
+    isLoading,
+    error,
+    fetchTransactions,
+    fetchCategories,
+    groupedTransactions,
+  }
 }
