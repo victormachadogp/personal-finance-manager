@@ -5,6 +5,9 @@ description = ""
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
 package-mode = false
+packages = [
+    { include = "src" }
+]
 
 [tool.ruff]
 line-length = 120
@@ -17,8 +20,13 @@ sqlmodel = "^0.0.22"
 shortuuid = "^1.0.13"
 mypy = "^1.13.0"
 rapidfuzz = "^3.11.0"
+click = "^8.1.7"
 
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+seed_db = "src.database:seed_db"
+importcsv = "src.tools:load_csv"
