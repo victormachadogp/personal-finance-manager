@@ -1,35 +1,30 @@
 <template>
-  <header>
+  <div class=" sm:w-9/12 lg:w-7/12 xl:w-5/12 mx-auto">
+  <header class="">
 
       <nav class="flex justify-center gap-5">
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/about">About</RouterLink>
       </nav>
-    
-    {{transactions}}
+  
   </header>
 
 
   <RouterView />
+</div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
-import { transactionService } from './services/transactionService'
-import type { Transaction } from './types/Transaction'
+</script>
 
-const transactions = ref<Transaction[]>([])
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
-const fetchTransactions = async () => {
-  try {
-    transactions.value = await transactionService.fetchTransactions()
-  } catch (error) {
-    console.error('Error loading transactions:', error)
-  }
+body {
+  font-family: 'Inter', sans-serif;
+  color: #000;
+  background-color: #EBEDF0;
 }
 
-onMounted(() => {
-  fetchTransactions()
-})
-</script>
+</style>
