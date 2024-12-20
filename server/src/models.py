@@ -1,4 +1,4 @@
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, Relationship, SQLModel
 from typing import Optional
 from datetime import datetime
 
@@ -24,10 +24,21 @@ class Merchant(SQLModel, table=True):
     logo_icon: str
 
 
+class Currency(SQLModel, table=True):
+    id: str = Field(..., primary_key=True)
+    name: str = Field(index=True)
+    code: str
+    symbol: str
+
+    accounts: list["Account"] = Relationship(back_populates="currency")
+
+
 class Account(SQLModel, table=True):
     id: str = Field(default_factory=generate_id, primary_key=True)
     name: str = Field(index=True)
-    # icon_logo: str
+    currency_id: str = Field(foreign_key="currency.id")
+
+    currency: Currency = Relationship(back_populates="accounts")
 
 
 # class TransactionType(str, Enum):

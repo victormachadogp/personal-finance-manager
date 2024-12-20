@@ -1,5 +1,6 @@
 from typing import Optional, Sequence
 from fastapi import APIRouter, Depends, Query
+from pydantic import BaseModel
 from src.dtos import MonthYear
 from src.models import Category, Transaction
 from src.services.finances import CategoryAnalyticsRespose, FinanceService
@@ -43,3 +44,25 @@ def get_analytics(
 ) -> CategoryAnalyticsRespose:
     month_filter = to_month_year(month)
     return finance_service.get_category_analytics(month=month_filter)
+
+
+# Schemas can be moved to a separate file
+class CurrencySchema(BaseModel):
+    id: str
+    name: str
+    code: str
+    symbol: str
+    model_config = {"from_attributes": True}
+
+
+class AccountSchema(BaseModel):
+    id: str
+    name: str
+    currency: CurrencySchema
+    model_config = {"from_attributes": True}
+
+
+@router.get("/accounts")
+def get_accounts(finance_service: FinanceService = Depends(finance_service)) -> Sequence[AccountSchema]:
+    accounts = finance_service.get_accounts()
+    return [AccountSchema.model_validate(account) for account in accounts]
