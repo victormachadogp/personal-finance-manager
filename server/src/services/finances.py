@@ -7,6 +7,7 @@ from decimal import Decimal
 from typing import Optional, Sequence
 from sqlalchemy.sql import func
 from sqlmodel.sql.expression import Select
+from sqlalchemy.orm import joinedload
 
 """
 TODO: Service is returning ORM objects, should return DTOs instead
@@ -103,3 +104,8 @@ class FinanceService:
         analytics = [CategoryAnalytics(id=row.id, total=row.total) for row in results]
 
         return CategoryAnalyticsRespose(categories=analytics, total=sum([a.total for a in analytics]))
+
+    def get_accounts(self) -> Sequence[Account]:
+        # join account with currency to get currency details
+        statement = select(Account).options(joinedload(Account.currency)).order_by(Account.name)
+        return self.session.exec(statement).all()
