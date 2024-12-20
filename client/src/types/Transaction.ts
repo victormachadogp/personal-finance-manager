@@ -9,6 +9,6 @@ export interface Transaction {
 }
 export interface Category {
   id: string
-  name: string
+  title: string
   color: string
 }
