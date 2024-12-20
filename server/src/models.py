@@ -12,20 +12,20 @@ def generate_id():
 
 
 class Category(SQLModel, table=True):
-    id: Optional[str] = Field(default_factory=generate_id, primary_key=True)
+    id: str = Field(default_factory=generate_id, primary_key=True)
     title: str = Field(index=True)
     icon: str
     color: str = Field(default="#000000")
 
 
 class Merchant(SQLModel, table=True):
-    id: Optional[str] = Field(default_factory=generate_id, primary_key=True)
+    id: str = Field(default_factory=generate_id, primary_key=True)
     name: str = Field(index=True)
     logo_icon: str
 
 
 class Account(SQLModel, table=True):
-    id: Optional[str] = Field(default_factory=generate_id, primary_key=True)
+    id: str = Field(default_factory=generate_id, primary_key=True)
     name: str = Field(index=True)
     # icon_logo: str
 
@@ -36,7 +36,7 @@ class Account(SQLModel, table=True):
 
 
 class Transaction(SQLModel, table=True):
-    id: Optional[str] = Field(default_factory=generate_id, primary_key=True)
+    id: str = Field(default_factory=generate_id, primary_key=True)
     date: datetime
     description: str
     amount: Decimal = Field(..., decimal_places=2)

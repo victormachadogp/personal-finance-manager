@@ -4,6 +4,8 @@ from src.models import Account, Category, Transaction
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional, Sequence
+from sqlalchemy.sql import func
+from sqlmodel.sql.expression import Select
 
 """
 TODO: Service is returning ORM objects, should return DTOs instead
@@ -11,7 +13,7 @@ TODO: Service is returning ORM objects, should return DTOs instead
 
 
 class CategoryAnalytics(SQLModel):
-    category_id: str
+    id: Optional[str]  # None for uncategorized transactions
     total: Decimal
 
 
@@ -43,9 +45,9 @@ class FinanceService:
         date: datetime,
         description: str,
         amount: Decimal,
-        category_id: int,
-        account_id: int,
-        merchant_id: Optional[int] = None,
+        category_id: Optional[str],
+        account_id: str,
+        merchant_id: Optional[str] = None,
         notes: Optional[str] = None,
     ) -> Transaction:
         transaction = Transaction(
@@ -69,20 +71,20 @@ class FinanceService:
         return self.session.exec(select(Category)).all()
 
     def get_category_analytics(self) -> CategoryAnalyticsRespose:
-        from sqlalchemy.sql import func
-
-        statement = (
+        statement: Select = (
             select(
-                Category.id,  # Select the category title
+                Category.id,
                 func.sum(Transaction.amount).label("total"),  # Sum of transaction amounts
             )
-            .join(Category, Category.id == Transaction.category_id)  # Join Transaction and Category on category_id
-            .group_by(Category.title)  # Group by category title
+            .join(Category, Category.id == Transaction.category_id, isouter=True)  # Left join
+            .group_by(Category.id)
+            # order by total amount in descending order
+            .order_by(func.sum(Transaction.amount).desc())
         )
 
         results = self.session.exec(statement).all()  # Execute the query
 
         # Convert the results to instances of CategoryAnalytics
-        analytics = [CategoryAnalytics(category_id=row.id, total=row.total) for row in results]
+        analytics = [CategoryAnalytics(id=row.id, total=row.total) for row in results]
 
         return CategoryAnalyticsRespose(categories=analytics, total=sum([a.total for a in analytics]))
