@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from sqlmodel import SQLModel, Session, select
+from src.dtos import MonthYear
 from src.models import Account, Category, Transaction
 from datetime import datetime
 from decimal import Decimal
@@ -42,10 +43,11 @@ class FinanceService:
 
     def create_transaction(
         self,
+        *,
         date: datetime,
         description: str,
         amount: Decimal,
-        category_id: Optional[str],
+        category_id: Optional[str] = None,
         account_id: str,
         merchant_id: Optional[str] = None,
         notes: Optional[str] = None,
@@ -64,23 +66,36 @@ class FinanceService:
         self.session.refresh(transaction)
         return transaction
 
-    def get_transactions(self) -> Sequence[Transaction]:
-        return self.session.exec(select(Transaction)).all()
+    def get_transactions(self, month: Optional[MonthYear] = None) -> Sequence[Transaction]:
+        statement = select(Transaction)
+
+        # Filter by month if provided
+        if month:
+            statement = statement.where(
+                func.extract("year", Transaction.date) == month.year,
+                func.extract("month", Transaction.date) == month.month,
+            )
+
+        return self.session.exec(statement).all()
 
     def get_categories(self) -> Sequence[Category]:
         return self.session.exec(select(Category)).all()
 
-    def get_category_analytics(self) -> CategoryAnalyticsRespose:
+    def get_category_analytics(self, month: Optional[MonthYear] = None) -> CategoryAnalyticsRespose:
         statement: Select = (
-            select(
-                Category.id,
-                func.sum(Transaction.amount).label("total"),  # Sum of transaction amounts
-            )
-            .join(Category, Category.id == Transaction.category_id, isouter=True)  # Left join
+            select(Category.id, func.sum(Transaction.amount).label("total"))
+            # Left join to include uncategorized transactions
+            .join(Category, Category.id == Transaction.category_id, isouter=True)
             .group_by(Category.id)
-            # order by total amount in descending order
             .order_by(func.sum(Transaction.amount).desc())
         )
+
+        # Filter by month if provided
+        if month:
+            statement = statement.where(
+                func.extract("year", Transaction.date) == month.year,
+                func.extract("month", Transaction.date) == month.month,
+            )
 
         results = self.session.exec(statement).all()  # Execute the query
 
