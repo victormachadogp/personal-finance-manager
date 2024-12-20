@@ -10,7 +10,6 @@
           <TransactionDateGroup 
             :date="date"
             :transactions="transactions"
-            :categories="categories"
           />
         </div>
       </template>
@@ -26,7 +25,6 @@ const {
   isLoading,
   error,
   groupedTransactions,
-  categories,
   fetchTransactions,
   fetchCategories
 } = useTransactions()

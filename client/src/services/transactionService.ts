@@ -1,11 +1,11 @@
 import { ref, computed } from 'vue'
 import type { Transaction, Category } from '../types/Transaction'
 
-const BASE_URL = 'http://localhost:3000'
+const BASE_URL = 'http://localhost:8000'
 
 export function useTransactions() {
   const transactions = ref<Transaction[]>([])
-  const categories = ref<Category[]>([])
+  const categoryMap = ref<Map<string, Category>>(new Map())
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
@@ -24,27 +24,38 @@ export function useTransactions() {
   const fetchCategories = async () => {
     try {
       const response = await fetch(`${BASE_URL}/categories`)
-      categories.value = await response.json()
+      const categoriesList = await response.json()
+      categoryMap.value = new Map(categoriesList.map((category) => [category.id, category]))
     } catch (e) {
       error.value = 'Failed to fetch categories'
     }
   }
+  const getCategory = (categoryId: string | null) => {
+    if (!categoryId) return undefined
+    return categoryMap.value.get(categoryId)
+  }
 
   const groupedTransactions = computed(() => {
-    const groups: Record<string, Transaction[]> = {}
+    const groups: Record<string, (Transaction & { category?: Category })[]> = {}
+
     transactions.value.forEach((transaction) => {
       const date = transaction.date
       if (!groups[date]) {
         groups[date] = []
       }
-      groups[date].push(transaction)
+      // Já incluímos a categoria junto com a transação
+      const transactionWithCategory = {
+        ...transaction,
+        category: getCategory(transaction.category_id),
+      }
+      groups[date].push(transactionWithCategory)
     })
     return groups
   })
 
   return {
     transactions,
-    categories,
+    getCategory,
     isLoading,
     error,
     fetchTransactions,

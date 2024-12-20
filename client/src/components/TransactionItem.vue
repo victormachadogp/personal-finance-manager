@@ -13,12 +13,12 @@
         
         <div
          class="w-2 h-2 rounded-full mr-2"
-         :style="{ backgroundColor: `${category.color}20` }"
+         :style="{ backgroundColor: `${category.color}` }"
          ></div>
           <span 
             class="text-xs"            
           >
-            {{ category.name }}
+            {{ category.title }}
           </span>
         </div>
         <div class="ml-auto text-xs font-medium">
