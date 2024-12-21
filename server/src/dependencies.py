@@ -3,8 +3,12 @@ from src.services.finances import FinanceService
 from src import database
 
 
-def get_session():
-    return database.get_session()
+def engine():
+    return database.get_engine()
+
+
+def get_session(engine=Depends(engine)):
+    return database.get_session(engine)
 
 
 def finance_service(session=Depends(get_session)):

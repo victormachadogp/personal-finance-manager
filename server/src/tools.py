@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from src import base_categories
 from src.models import Transaction
 from src.services.categorization import CategorizationService
-from src.database import get_session
+from src import database
 
 
 def get_file_data(file_path):
@@ -78,7 +78,9 @@ def import_data(file_path: str, account_id: str, column_mapper: ColumnMapper):
     """
     data = get_file_data(file_path)
     transactions = data_to_transaction(data, account_id, column_mapper)
-    session = get_session()
+    
+    engine = database.get_engine()
+    session = database.get_session(engine)
     for transaction in transactions:
         session.add(transaction)
     session.commit()
