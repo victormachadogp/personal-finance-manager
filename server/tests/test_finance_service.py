@@ -1,3 +1,6 @@
+import io
+from typing import BinaryIO
+import pytest
 from sqlmodel import Session
 from src.dtos import MonthYear
 from src.models import Account
@@ -5,10 +8,12 @@ from src.services.finances import FinanceService
 from datetime import datetime
 from decimal import Decimal
 
+from src.tools import ColumnMapper
+
 
 def test_create_account(db_session: Session):
     service = FinanceService(db_session)
-    account = service.create_account(name="Test Account")
+    account = service.create_account(name="Test Account", currency_id="gbp")
     assert account.id is not None
     assert account.name == "Test Account"
 
@@ -20,10 +25,9 @@ def test_create_category(db_session: Session):
     assert category.title == "Test Category"
 
 
-def test_create_transaction(db_session: Session):
+def test_create_transaction(db_session: Session, account: Account):
     service = FinanceService(db_session)
 
-    account = service.create_account(name="Test Account")
     category = service.create_category(title="Test Category", icon="bookmark")
 
     transaction = service.create_transaction(
@@ -145,3 +149,28 @@ def test_get_category_analytics_by_month(db_session: Session, account: Account):
     """THEN the response should contain the total amount"""
     assert res.total == Decimal("250.00")
     assert len(res.categories) == 3
+
+
+@pytest.fixture
+def csv_file() -> BinaryIO:
+    content = "date,description,amount\n"
+    content += "2025-01-01,Test 1,100.00\n"
+    content += "2025-01-01,Test 2,50.00\n"
+    file = io.BytesIO(content.encode("utf-8"))
+    return file
+
+
+def test_file_import(db_session: Session, csv_file: BinaryIO, account: Account):
+    service = FinanceService(db_session)
+    transactions = service.get_transactions()
+    assert len(transactions) == 0
+
+    """GIVEN a CSV file with transactions"""
+    column_mapper = ColumnMapper(date="date", description="description", amount="amount", date_format="%Y-%m-%d")
+
+    """WHEN importing the CSV file"""
+    service.import_csv(file=csv_file, account_id=account.id, column_mapper=column_mapper)
+
+    """THEN the transactions should be imported"""
+    transactions = service.get_transactions()
+    assert len(transactions) == 2

@@ -1,13 +1,17 @@
+import csv
+import io
 from pydantic import BaseModel
 from sqlmodel import SQLModel, Session, select
 from src.dtos import MonthYear
 from src.models import Account, Category, Transaction
 from datetime import datetime
 from decimal import Decimal
-from typing import Optional, Sequence
+from typing import BinaryIO, Optional, Sequence
 from sqlalchemy.sql import func
 from sqlmodel.sql.expression import Select
 from sqlalchemy.orm import joinedload
+
+from src.tools import ColumnMapper, data_to_transaction
 
 """
 TODO: Service is returning ORM objects, should return DTOs instead
@@ -28,8 +32,8 @@ class FinanceService:
     def __init__(self, session: Session):
         self.session = session
 
-    def create_account(self, name: str) -> Account:
-        account = Account(name=name)
+    def create_account(self, name: str, currency_id: str) -> Account:
+        account = Account(name=name, currency_id=currency_id)
         self.session.add(account)
         self.session.commit()
         self.session.refresh(account)
@@ -109,3 +113,16 @@ class FinanceService:
         # join account with currency to get currency details
         statement = select(Account).options(joinedload(Account.currency)).order_by(Account.name)
         return self.session.exec(statement).all()
+
+    def import_csv(self, file: BinaryIO, account_id: str, column_mapper: ColumnMapper):
+        
+        data = self._get_file_data(file)
+        transactions = data_to_transaction(data, account_id, column_mapper)
+        for transaction in transactions:
+            self.session.add(transaction)
+        self.session.commit()
+
+    def _get_file_data(self, file: BinaryIO):
+        file.seek(0)  # Ensure the file pointer is at the start
+        reader = csv.DictReader(io.TextIOWrapper(file, encoding='utf-8'))
+        return [row for row in reader]
