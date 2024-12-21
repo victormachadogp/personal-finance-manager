@@ -1,11 +1,13 @@
 import { ref, computed } from 'vue'
 import type { Transaction, Category } from '../types/Transaction'
+import type { AnalyticsResponse, AnalyticsSummary, AnalyticsItem } from '../types/Analytics'
 
 const BASE_URL = import.meta.env.VITE_API_URL
 
 export function useTransactions() {
   const transactions = ref<Transaction[]>([])
   const categoryMap = ref<Map<string, Category>>(new Map())
+  const analyticsData = ref<AnalyticsResponse | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
@@ -53,13 +55,51 @@ export function useTransactions() {
     return groups
   })
 
+  const fetchAnalytics = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/categories/analytics`)
+      analyticsData.value = await response.json()
+    } catch (e) {
+      error.value = 'Failed to fetch analytics'
+    }
+  }
+
+  const analyticsSummary = computed((): AnalyticsSummary | null => {
+    if (!analyticsData.value) return null
+
+    const total = parseFloat(analyticsData.value.total)
+
+    const items: AnalyticsItem[] = analyticsData.value.categories
+      .map((categoryAnalytics) => {
+        const category = categoryAnalytics.id
+          ? categoryMap.value.get(categoryAnalytics.id)
+          : { title: 'Uncategorized', color: '#94A3B8' } // Default for null category
+
+        const categoryTotal = parseFloat(categoryAnalytics.total)
+
+        return {
+          categoryId: categoryAnalytics.id,
+          category: category?.title || 'Unknown',
+          total: categoryTotal,
+          color: category?.color || '#94A3B8',
+          percentage: (categoryTotal / total) * 100,
+        }
+      })
+      .sort((a, b) => b.total - a.total)
+
+    return {
+      items,
+      total,
+    }
+  })
+
   return {
-    transactions,
-    getCategory,
     isLoading,
     error,
     fetchTransactions,
     fetchCategories,
+    fetchAnalytics,
     groupedTransactions,
+    analyticsSummary,
   }
 }
