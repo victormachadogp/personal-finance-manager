@@ -1,11 +1,10 @@
 from typing import Optional, Sequence
-from fastapi import APIRouter, Depends, File, Query, UploadFile
+from fastapi import APIRouter, Depends, File, Form, Query, UploadFile
 from pydantic import BaseModel
-from src.dtos import MonthYear
+from src.dtos import ColumnMapper, MonthYear
 from src.models import Category, Transaction
 from src.services.finances import CategoryAnalyticsRespose, FinanceService
 from src.dependencies import finance_service
-from src.tools import ColumnMapper
 
 router = APIRouter()
 
@@ -72,10 +71,10 @@ def get_accounts(finance_service: FinanceService = Depends(finance_service)) -> 
 @router.post("/accounts/{account_id}/transactions/import")
 def upload_transactions_csv(
     account_id: str,
-    finance_service: FinanceService = Depends(finance_service),
+    column_mapper: str = Form(...),
     file: UploadFile = File(...),
+    finance_service: FinanceService = Depends(finance_service),
 ):
-    column_mapper = ColumnMapper(date="Date", description="Description", amount="Amount", date_format="%Y-%m-%d", category="Category")
-
-    finance_service.import_csv(file=file.file, account_id=account_id, column_mapper=column_mapper)
+    _column_mapper = ColumnMapper.parse_raw(column_mapper)
+    finance_service.import_csv(file=file.file, account_id=account_id, column_mapper=_column_mapper)
     return ""

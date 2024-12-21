@@ -3,8 +3,8 @@ import csv
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel
 from src import base_categories
+from src.dtos import ColumnMapper
 from src.models import Transaction
 from src.services.categorization import CategorizationService
 from src import database
@@ -14,14 +14,6 @@ def get_file_data(file_path):
     with open(file_path, mode="r", newline="", encoding="utf-8") as file:
         reader = csv.DictReader(file)
         return [row for row in reader]
-
-
-class ColumnMapper(BaseModel):
-    date: str
-    date_format: str  # eg: "%d/%m/%Y" or "%Y-%m-%d"
-    description: str
-    amount: str
-    category: Optional[str] = None
 
 
 def data_to_transaction(data, account_id: str, column_mapper: ColumnMapper):
@@ -78,7 +70,7 @@ def import_data(file_path: str, account_id: str, column_mapper: ColumnMapper):
     """
     data = get_file_data(file_path)
     transactions = data_to_transaction(data, account_id, column_mapper)
-    
+
     engine = database.get_engine()
     session = database.get_session(engine)
     for transaction in transactions:
