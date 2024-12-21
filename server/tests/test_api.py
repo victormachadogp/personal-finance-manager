@@ -1,4 +1,5 @@
 import io
+import json
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
@@ -18,8 +19,13 @@ def test_upload_transactions_csv(client: TestClient, account: Account, db_sessio
     file = io.BytesIO("\n".join(csv_data).encode("utf-8"))
 
     # Upload the CSV file
+    column_mapper = {"date": "date", "description": "description", "amount": "amount", "date_format": "%Y-%m-%d"}
     files_payload = {"file": ("test.csv", file, "text/csv")}
-    response = client.post(f"/accounts/{account.id}/transactions/import", files=files_payload)
+    response = client.post(
+        f"/accounts/{account.id}/transactions/import",
+        files=files_payload,
+        data={"column_mapper": json.dumps(column_mapper)},
+    )
 
     assert response.status_code == 200
 

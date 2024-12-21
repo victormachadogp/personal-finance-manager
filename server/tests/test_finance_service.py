@@ -2,13 +2,12 @@ import io
 from typing import BinaryIO
 import pytest
 from sqlmodel import Session
-from src.dtos import MonthYear
+from src.dtos import ColumnMapper, MonthYear
 from src.models import Account
 from src.services.finances import FinanceService
 from datetime import datetime
 from decimal import Decimal
 
-from src.tools import ColumnMapper
 
 
 def test_create_account(db_session: Session):
