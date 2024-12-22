@@ -9,7 +9,6 @@ from datetime import datetime
 from decimal import Decimal
 
 
-
 def test_create_account(db_session: Session):
     service = FinanceService(db_session)
     account = service.create_account(name="Test Account", currency_id="gbp")
@@ -148,15 +147,6 @@ def test_get_category_analytics_by_month(db_session: Session, account: Account):
     """THEN the response should contain the total amount"""
     assert res.total == Decimal("250.00")
     assert len(res.categories) == 3
-
-
-@pytest.fixture
-def csv_file() -> BinaryIO:
-    content = "date,description,amount\n"
-    content += "2025-01-01,Test 1,100.00\n"
-    content += "2025-01-01,Test 2,50.00\n"
-    file = io.BytesIO(content.encode("utf-8"))
-    return file
 
 
 def test_file_import(db_session: Session, csv_file: BinaryIO, account: Account):

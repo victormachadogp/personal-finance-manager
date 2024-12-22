@@ -2,6 +2,7 @@ import csv
 import io
 from pydantic import BaseModel
 from sqlmodel import SQLModel, Session, select
+from src import base_categories
 from src.dtos import ColumnMapper, MonthYear
 from src.models import Account, Category, Transaction
 from datetime import datetime
@@ -11,7 +12,8 @@ from sqlalchemy.sql import func
 from sqlmodel.sql.expression import Select
 from sqlalchemy.orm import joinedload
 
-from src.tools import data_to_transaction
+from src.services.categorization import CategorizationService
+
 
 """
 TODO: Service is returning ORM objects, should return DTOs instead
@@ -115,14 +117,50 @@ class FinanceService:
         return self.session.exec(statement).all()
 
     def import_csv(self, file: BinaryIO, account_id: str, column_mapper: ColumnMapper):
-        
-        data = self._get_file_data(file)
+        headers, data = _get_file_data(file)
+        _validate_headers(headers, column_mapper)
+
         transactions = data_to_transaction(data, account_id, column_mapper)
         for transaction in transactions:
             self.session.add(transaction)
         self.session.commit()
 
-    def _get_file_data(self, file: BinaryIO):
-        file.seek(0)  # Ensure the file pointer is at the start
-        reader = csv.DictReader(io.TextIOWrapper(file, encoding='utf-8'))
-        return [row for row in reader]
+
+def _get_file_data(file: BinaryIO):
+    file.seek(0)  # Ensure the file pointer is at the start
+    reader = csv.DictReader(io.TextIOWrapper(file, encoding="utf-8"))
+    reader.fieldnames = [field.lower() for field in reader.fieldnames]
+    data = [row for row in reader]
+    headers = reader.fieldnames
+    return headers, data
+
+
+def data_to_transaction(data, account_id: str, column_mapper: ColumnMapper):
+    mapping_strategy = base_categories.category_mapping if column_mapper.category else base_categories.mapping
+    cat_service = CategorizationService(mapping_strategy)
+
+    transactions = []
+    for row in data:
+        # conver row["Date"] (eg: 07/09/2024) to a datetime object
+        date = datetime.strptime(row[column_mapper.date], column_mapper.date_format)
+        transaction = Transaction(
+            date=date,
+            description=row[column_mapper.description],
+            amount=row[column_mapper.amount],
+            account_id=account_id,
+        )
+        source_category = row.get(column_mapper.category)
+        category_id = cat_service.categorize_transaction(transaction, source_category=source_category)
+        transaction.category_id = category_id
+        transactions.append(transaction)
+    return transactions
+
+
+def _validate_headers(headers, column_mapper: ColumnMapper):
+    required_headers = [column_mapper.date, column_mapper.description, column_mapper.amount]
+    if column_mapper.category:
+        required_headers.append(column_mapper.category)
+
+    missing_headers = set(required_headers) - set(headers)
+    if missing_headers:
+        raise ValueError(f"Missing headers: {missing_headers}")

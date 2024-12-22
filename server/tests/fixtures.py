@@ -1,5 +1,6 @@
+import io
 import os
-from typing import Iterator
+from typing import BinaryIO, Iterator
 import pytest
 from sqlalchemy import Engine
 from sqlmodel import Session, create_engine, SQLModel
@@ -43,3 +44,11 @@ def client(engine: Engine) -> TestClient:
     app.dependency_overrides[dependencies.engine] = lambda: engine
 
     return TestClient(app)
+
+@pytest.fixture
+def csv_file() -> BinaryIO:
+    content = "date,description,amount\n"
+    content += "2025-01-01,Test 1,100.00\n"
+    content += "2025-01-01,Test 2,50.00\n"
+    file = io.BytesIO(content.encode("utf-8"))
+    return file

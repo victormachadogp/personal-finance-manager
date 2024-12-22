@@ -1,13 +1,10 @@
 import click
 import csv
-from datetime import datetime
-from typing import Optional
+from typing import BinaryIO, Optional
 
-from src import base_categories
 from src.dtos import ColumnMapper
-from src.models import Transaction
-from src.services.categorization import CategorizationService
 from src import database
+from src.services.finances import FinanceService
 
 
 def get_file_data(file_path):
@@ -16,40 +13,19 @@ def get_file_data(file_path):
         return [row for row in reader]
 
 
-def data_to_transaction(data, account_id: str, column_mapper: ColumnMapper):
-    mapping_strategy = base_categories.category_mapping if column_mapper.category else base_categories.mapping
-    cat_service = CategorizationService(mapping_strategy)
-
-    transactions = []
-    for row in data:
-        # conver row["Date"] (eg: 07/09/2024) to a datetime object
-        date = datetime.strptime(row[column_mapper.date], column_mapper.date_format)
-        transaction = Transaction(
-            date=date,
-            description=row[column_mapper.description],
-            amount=row[column_mapper.amount],
-            account_id=account_id,
-        )
-        source_category = row.get(column_mapper.category)
-        category_id = cat_service.categorize_transaction(transaction, source_category=source_category)
-        transaction.category_id = category_id
-        transactions.append(transaction)
-    return transactions
-
-
 @click.command()
-@click.argument("file_path", type=click.Path(exists=True))
-@click.argument("account_id", type=str)
-@click.argument("date", type=str)
-@click.argument("title", type=str)
-@click.argument("amount", type=str)
-@click.argument("date_format", type=str)
-@click.argument("category", type=str, required=False)
+@click.argument("file_path", type=click.Path(exists=True), required=True)
+@click.option("--account_id", type=str, required=True, help="The account ID to associate with the CSV.")
+@click.option("--date", type=str, required=True, help="The column name for the date.")
+@click.option("--description", type=str, required=True, help="The column name for the transaction description.")
+@click.option("--amount", type=str, required=True, help="The column name for the transaction amount.")
+@click.option("--date_format", type=str, required=True, help="The format of the date in the CSV (e.g., '%Y-%m-%d').")
+@click.option("--category", type=str, required=False, help="Optional transaction category.")
 def load_csv(
     file_path: str,
     account_id: str,
     date: str,
-    title: str,
+    description: str,
     amount: str,
     date_format: str,
     category: Optional[str] = None,
@@ -58,24 +34,20 @@ def load_csv(
     Load a CSV file from the given FILE_PATH and display its contents.
     """
     column_mapper = ColumnMapper(
-        date=date, description=title, amount=amount, date_format=date_format, category=category
+        date=date, description=description, amount=amount, date_format=date_format, category=category
     )
-    # print(column_mapper)
-    import_data(file_path, account_id, column_mapper)
+    with open(file_path, mode="rb") as file:
+        import_data(file, account_id, column_mapper)
 
 
-def import_data(file_path: str, account_id: str, column_mapper: ColumnMapper):
+def import_data(file: BinaryIO, account_id: str, column_mapper: ColumnMapper):
     """
     Load a CSV file from the given FILE_PATH and display its contents.
     """
-    data = get_file_data(file_path)
-    transactions = data_to_transaction(data, account_id, column_mapper)
-
     engine = database.get_engine()
-    session = database.get_session(engine)
-    for transaction in transactions:
-        session.add(transaction)
-    session.commit()
+    session = database.get_session(engine=engine)
+    finance_service = FinanceService(session=session)
+    finance_service.import_csv(file, account_id, column_mapper)
     print("Data successfully imported!")
 
 
