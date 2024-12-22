@@ -7,7 +7,7 @@ from src.models import Currency
 
 def get_engine():
     engine = create_engine("sqlite:///finance-manager.db")
-    # SQLModel.metadata.create_all(engine, checkfirst=True)
+    SQLModel.metadata.create_all(engine, checkfirst=True)
     return engine
 
 
@@ -18,8 +18,10 @@ def get_session(engine):
 
 
 def seed_db():
-    seed_currencies()
-    seed_categories()
+    engine = get_engine()
+    session = get_session(engine)
+    seed_currencies(session=session)
+    seed_categories(session=session)
 
 
 def seed_categories(session: Session):
