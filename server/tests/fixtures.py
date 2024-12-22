@@ -14,6 +14,10 @@ from src.services.finances import FinanceService
 @pytest.fixture
 def engine() -> Iterator[Engine]:
     test_db = "test.db"
+    # Remove the SQLite database file if it exists
+    if os.path.exists(test_db):
+        os.remove(test_db)
+
     engine = create_engine(f"sqlite:///{test_db}")
     SQLModel.metadata.create_all(engine)
     yield engine
@@ -44,6 +48,7 @@ def client(engine: Engine) -> TestClient:
     app.dependency_overrides[dependencies.engine] = lambda: engine
 
     return TestClient(app)
+
 
 @pytest.fixture
 def csv_file() -> BinaryIO:

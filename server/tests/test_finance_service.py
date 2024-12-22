@@ -155,7 +155,7 @@ def test_file_import(db_session: Session, csv_file: BinaryIO, account: Account):
     assert len(transactions) == 0
 
     """GIVEN a CSV file with transactions"""
-    column_mapper = ColumnMapper(date="date", description="description", amount="amount", date_format="%Y-%m-%d")
+    column_mapper = ColumnMapper(date="Date", description="Description", amount="Amount", date_format="%Y-%m-%d")
 
     """WHEN importing the CSV file"""
     service.import_csv(file=csv_file, account_id=account.id, column_mapper=column_mapper)
