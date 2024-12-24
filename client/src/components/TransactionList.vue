@@ -9,7 +9,7 @@
           id="viewMode"
           class="form-checkbox h-4 w-4"
         />
-        <label for="viewMode" class="text-sm text-gray-700">Ver todas as transações</label>
+        <label for="viewMode" class="text-sm text-gray-700">Show all transactions</label>
       </div>
 
       <input
