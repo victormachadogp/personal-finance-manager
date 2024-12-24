@@ -13,7 +13,7 @@
           backgroundColor: item.color,
           width: `${item.percentage}%`
         }"
-        class="h-full rounded-full"
+        class="h-full rounded-full !w-full"
       ></div>
     </div>
     <div>

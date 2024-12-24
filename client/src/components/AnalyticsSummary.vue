@@ -1,19 +1,24 @@
 <template>
   <div class="w-[420px] mt-[55px]">
+    <div class="flex items-center justify-between">
     <h2 class="font-medium mb-4">Analytics</h2>
-
-    <div v-if="isLoading" class="loading">Loading...</div>
-    <div v-else-if="error" class="error">{{ error }}</div>
-    <div v-else-if="analyticsSummary" class="bg-white flex flex-col px-7 py-8 gap-2 rounded-[0.3rem]">
+      <div class="mb-4 text-sm text-gray-600">
+        <span v-if="store.showAllTransactions">All Transactions</span>
+        <span v-else>{{ store.selectedMonth }}</span>
+      </div>
+  </div>
+    <div v-if="store.isLoading" class="loading">Loading...</div>
+    <div v-else-if="store.error" class="error">{{ store.error }}</div>
+    <div v-else-if="store.analyticsSummary" class="bg-white flex flex-col px-7 py-8 gap-2 rounded-[0.3rem]">
       <AnalyticsItem
-        v-for="item in analyticsSummary.items"
+        v-for="item in store.analyticsSummary.items"
         :key="item.categoryId || 'uncategorized'"
         :item="item"
       />
 
       <div class="flex justify-between text-xs font-medium border-t mt-4 pt-3">
         <span>Total</span>
-        <span>{{ formatAmount(analyticsSummary.total) }}</span>
+        <span>{{ formatAmount(store.analyticsSummary.total) }}</span>
       </div>
     </div>
   </div>
@@ -21,16 +26,10 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { useTransactions } from '../services/transactionService'
+import { useTransactionStore } from '../stores/transactionStore'
 import AnalyticsItem from './AnalyticsItem.vue'
 
-const { 
-  analyticsSummary, 
-  isLoading, 
-  error, 
-  fetchCategories, 
-  fetchAnalytics 
-} = useTransactions()
+const store = useTransactionStore()
 
 const formatAmount = (amount: number): string => {
   return new Intl.NumberFormat('en-GB', {
@@ -41,6 +40,6 @@ const formatAmount = (amount: number): string => {
 }
 
 onMounted(async () => {
-  await Promise.all([fetchCategories(), fetchAnalytics()])
+  await store.fetchCategories()
 })
 </script>
