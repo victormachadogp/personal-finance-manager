@@ -13,6 +13,7 @@ def test_upload_transactions_csv(client: TestClient, account: Account, db_sessio
         "date,description,amount",
         "2024-07-09,Test1,100.00",
         "2024-07-10,Test2,200.00",
+        "2024-07-02,PAYMENT RECEIVED - THANK YOU,-500.00",
     ]
 
     # write to in memory file
@@ -32,4 +33,7 @@ def test_upload_transactions_csv(client: TestClient, account: Account, db_sessio
     """THEN the transactions are imported"""
     finance_service = FinanceService(db_session)
     transactions = finance_service.get_transactions()
-    assert len(transactions) == 2
+    assert len(transactions) == 3
+
+    excluded_transaction = transactions[2]
+    assert excluded_transaction.exclude_from_analytics is True

@@ -1,7 +1,7 @@
 import csv
 import io
 from pydantic import BaseModel
-from sqlmodel import SQLModel, Session, select
+from sqlmodel import SQLModel, Session, not_, select
 from src import base_categories
 from src.dtos import ColumnMapper, MonthYear
 from src.models import Account, Category, Transaction
@@ -58,6 +58,7 @@ class FinanceService:
         account_id: str,
         merchant_id: Optional[str] = None,
         notes: Optional[str] = None,
+        exclude_from_analytics: bool = False,
     ) -> Transaction:
         transaction = Transaction(
             date=date,
@@ -67,6 +68,7 @@ class FinanceService:
             account_id=account_id,
             merchant_id=merchant_id,
             notes=notes,
+            exclude_from_analytics=exclude_from_analytics,
         )
         self.session.add(transaction)
         self.session.commit()
@@ -81,7 +83,7 @@ class FinanceService:
             statement = statement.where(
                 func.extract("year", Transaction.date) == month.year,
                 func.extract("month", Transaction.date) == month.month,
-            )
+            ).order_by(Transaction.date.desc())
 
         return self.session.exec(statement).all()
 
@@ -93,6 +95,7 @@ class FinanceService:
             select(Category.id, func.sum(Transaction.amount).label("total"))
             # Left join to include uncategorized transactions
             .join(Category, Category.id == Transaction.category_id, isouter=True)
+            .where(not_(Transaction.exclude_from_analytics))
             .group_by(Category.id)
             .order_by(func.sum(Transaction.amount).desc())
         )
@@ -146,14 +149,29 @@ def data_to_transaction(data, account_id: str, column_mapper: ColumnMapper):
         transaction = Transaction(
             date=date,
             description=row[column_mapper.description],
-            amount=row[column_mapper.amount],
+            amount=Decimal(row[column_mapper.amount]),
             account_id=account_id,
         )
-        source_category = row.get(column_mapper.category)
-        category_id = cat_service.categorize_transaction(transaction, source_category=source_category)
-        transaction.category_id = category_id
+        # Identify Payments, which need to be marked as Excluded
+        if _is_payment(transaction.description, transaction.amount):
+            transaction.exclude_from_analytics = True
+
+        else:  # Categorize the transaction
+            source_category = row.get(column_mapper.category)
+            category_id = cat_service.categorize_transaction(transaction, source_category=source_category)
+            transaction.category_id = category_id
+
         transactions.append(transaction)
+
     return transactions
+
+
+def _is_payment(description: str, amount: Decimal) -> bool:
+    """
+    TODO: will likely need improvement to handle more cases
+    """
+    keywords = ["payment", "received"]
+    return any(keyword in description.lower() for keyword in keywords) and amount < 0
 
 
 def _validate_headers(headers, column_mapper: ColumnMapper):
