@@ -52,9 +52,11 @@ class Transaction(SQLModel, table=True):
     description: str
     amount: Decimal = Field(..., decimal_places=2)
     notes: Optional[str] = Field(default=None)
-    category_id: Optional[int] = Field(default=None, foreign_key="category.id")
+    category_id: Optional[str] = Field(default=None, foreign_key="category.id")
     merchant_id: Optional[str] = Field(default=None, foreign_key="merchant.id")
-    account_id: int = Field(foreign_key="account.id")
+    account_id: str = Field(foreign_key="account.id")
+    exclude_from_analytics: bool = Field(default=False)  # Stop it from being counted towards your spending (e.g. transfers between accounts)
+
     # type_: TransactionType
     # category: Category = Relationship(back_populates="transactions")
     # merchant: Optional[Merchant] = Relationship(back_populates="transactions")

@@ -94,9 +94,11 @@ def test_get_category_analytics(db_session: Session, account: Account):
     service.create_transaction(  # Category 2
         date=date, description="", amount=Decimal("100.00"), category_id=cat2.id, account_id=acc_id
     )
-
     service.create_transaction(  # No Category
         date=date, description="", amount=Decimal("50.00"), category_id=None, account_id=acc_id
+    )
+    service.create_transaction(  # No Category | Payment (Excluded) - shouldn't be included in analytics
+        date=date, description="Payment received", amount=Decimal("-400.00"), account_id=acc_id, exclude_from_analytics=True
     )
 
     """WHEN fetching category analytics"""
