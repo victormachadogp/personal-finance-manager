@@ -75,7 +75,9 @@ class FinanceService:
         self.session.refresh(transaction)
         return transaction
 
-    def get_transactions(self, month: Optional[MonthYear] = None) -> Sequence[Transaction]:
+    def get_transactions(
+        self, month: Optional[MonthYear] = None, category_id: Optional[str] = None
+    ) -> Sequence[Transaction]:
         statement = select(Transaction)
 
         # Filter by month if provided
@@ -84,6 +86,8 @@ class FinanceService:
                 func.extract("year", Transaction.date) == month.year,
                 func.extract("month", Transaction.date) == month.month,
             ).order_by(Transaction.date.desc())
+        if category_id:
+            statement = statement.where(Transaction.category_id == category_id)
 
         return self.session.exec(statement).all()
 

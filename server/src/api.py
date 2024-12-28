@@ -26,9 +26,10 @@ def to_month_year(month: Optional[str]) -> Optional[MonthYear]:
 def get_transactions(
     finance_service: FinanceService = Depends(finance_service),
     month: Optional[str] = YearMonthQuery,
+    category_id: Optional[str] = Query(None, description="Filter by category"),
 ) -> Sequence[Transaction]:
     month_filter = to_month_year(month)
-    transactions = finance_service.get_transactions(month=month_filter)
+    transactions = finance_service.get_transactions(month=month_filter, category_id=category_id)
     return transactions
 
 

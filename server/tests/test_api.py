@@ -1,3 +1,5 @@
+from datetime import datetime
+from decimal import Decimal
 import io
 import json
 from fastapi.testclient import TestClient
@@ -37,3 +39,31 @@ def test_upload_transactions_csv(client: TestClient, account: Account, db_sessio
 
     excluded_transaction = transactions[2]
     assert excluded_transaction.exclude_from_analytics is True
+
+
+def test_get_transactions_by_category_id(client: TestClient, account: Account, db_session: Session):
+    """GIVEN a set of transactions"""
+    finance_service = FinanceService(db_session)
+    cat1 = finance_service.create_category(title="Cat1", icon="bookmark")
+    cat2 = finance_service.create_category(title="Cat2", icon="bookmark")
+    cat3 = finance_service.create_category(title="Cat3", icon="bookmark")
+
+    date = datetime.now()
+    finance_service.create_transaction(
+        date=date, description="Test1", amount=Decimal(10), category_id=cat1.id, account_id=account.id
+    )
+    finance_service.create_transaction(
+        date=date, description="Test2", amount=Decimal(10), category_id=cat2.id, account_id=account.id
+    )
+    finance_service.create_transaction(
+        date=date, description="Test3", amount=Decimal(10), category_id=cat3.id, account_id=account.id
+    )
+
+    """WHEN fetching transactions by category_id"""
+    response = client.get(f"/transactions?category_id={cat1.id}")
+
+    """THEN the response should contain only transactions with the category_id"""
+    assert response.status_code == 200
+    transactions = response.json()
+    assert len(transactions) == 1
+    assert transactions[0]["category_id"] == cat1.id
