@@ -1,5 +1,5 @@
 <template>
-  <main class="w-4/5 mx-auto grid grid-cols-2 pt-5 bg-[#EBEDF0]">
+  <main class="w-4/5 mx-auto grid grid-cols-2 pt-5">
     <div class="flex flex-col justify-between grid-span-1">
         <PeriodNavigator class="mb-10" />
         <TransactionList />

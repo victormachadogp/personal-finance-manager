@@ -1,20 +1,16 @@
 <template>
-  <div class=" ">
-  <header class="">
-
+  <div class="bg-gray-100">
+    <header class="">
       <nav class="flex justify-center gap-5">
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/about">About</RouterLink>
       </nav>
-  
-  </header>
+    </header>
 
-  
-  <ToolTip ref="tooltipRef" />
+    <ToolTip ref="tooltipRef" />
 
-
-  <RouterView />
-</div>
+    <RouterView />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -24,7 +20,6 @@ import { RouterLink, RouterView } from 'vue-router'
 import ToolTip from './components/ToolTip.vue'
 
 const accountStore = useAccountStore()
-
 
 const tooltipRef = ref()
 
@@ -47,7 +42,5 @@ onMounted(async () => {
 body {
   font-family: 'Inter', sans-serif;
   color: #000;
-  background-color: #EBEDF0;
 }
-
 </style>
