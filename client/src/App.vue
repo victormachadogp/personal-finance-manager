@@ -9,13 +9,29 @@
   
   </header>
 
+  
+  <ToolTip ref="tooltipRef" />
+
 
   <RouterView />
 </div>
 </template>
 
 <script setup lang="ts">
+import { ref, provide } from 'vue'
+
 import { RouterLink, RouterView } from 'vue-router'
+import ToolTip from './components/ToolTip.vue'
+
+const tooltipRef = ref()
+
+provide('showGlobalTooltip', (text: string, element: HTMLElement) => {
+  tooltipRef.value?.show(text, element)
+})
+
+provide('hideGlobalTooltip', () => {
+  tooltipRef.value?.hide()
+})
 </script>
 
 <style>
