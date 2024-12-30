@@ -9,15 +9,6 @@
           @mouseleave="hideTooltip"
         >
           {{ transaction.description }}
-          <Teleport to="body">
-            <div 
-              v-if="isTooltipVisible && isTextTruncated" 
-              class="fixed z-50 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-normal max-w-xs"
-              :style="tooltipStyle"
-            >
-              {{ transaction.description }}
-            </div>
-          </Teleport>
         </h4>
         <span v-if="transaction.notes" class="text-xs text-[#8E8E93]">
           {{ transaction.notes }}
@@ -42,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, inject } from 'vue'
 import type { Transaction, Category } from '../types/Transaction'
 
 const props = defineProps<{
@@ -51,51 +42,32 @@ const props = defineProps<{
 }>()
 
 const descriptionEl = ref<HTMLElement | null>(null)
-const isTooltipVisible = ref(false)
-const isTextTruncated = ref(false)
-const tooltipPosition = ref({ x: 0, y: 0 })
+const showGlobalTooltip = inject('showGlobalTooltip') as (text: string, element: HTMLElement) => void
+const hideGlobalTooltip = inject('hideGlobalTooltip') as () => void
 
-const tooltipStyle = computed(() => ({
-  left: `${tooltipPosition.value.x}px`,
-  top: `${tooltipPosition.value.y}px`
-}))
-
-const checkIfTruncated = () => {
+const checkIfTruncated = (): boolean => {
   if (descriptionEl.value) {
-    isTextTruncated.value = descriptionEl.value.offsetWidth < descriptionEl.value.scrollWidth
+    return descriptionEl.value.offsetWidth < descriptionEl.value.scrollWidth
   }
-}
-
-const updateTooltipPosition = () => {
-  if (descriptionEl.value) {
-    const rect = descriptionEl.value.getBoundingClientRect()
-    tooltipPosition.value = {
-      x: rect.left,
-      y: rect.top - 30 // position 30px above the element
-    }
-  }
+  return false
 }
 
 const showTooltip = () => {
-  if (isTextTruncated.value) {
-    updateTooltipPosition()
-    isTooltipVisible.value = true
+  if (checkIfTruncated() && descriptionEl.value) {
+    showGlobalTooltip(props.transaction.description, descriptionEl.value)
   }
 }
 
 const hideTooltip = () => {
-  isTooltipVisible.value = false
+  hideGlobalTooltip()
 }
 
 onMounted(() => {
-  checkIfTruncated()
   window.addEventListener('resize', checkIfTruncated)
-  window.addEventListener('scroll', updateTooltipPosition, true)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', checkIfTruncated)
-  window.removeEventListener('scroll', updateTooltipPosition, true)
 })
 
 const formatAmount = (amount: number): string => {
