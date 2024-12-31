@@ -36,25 +36,23 @@
 </template>
   
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import TransactionDateGroup from './TransactionDateGroup.vue'
 import { useTransactionStore } from '../stores/transactionStore'
+import { TransactionUrlService } from '../services/transactionUrlService'
 
 const store = useTransactionStore()
-const currentMonth = ref(new Date().toISOString().slice(0, 7)) // Format: YYYY-MM
+const router = useRouter()
+const route = useRoute()
 
-const handleMonthChange = async () => {
-  await store.refreshData(currentMonth.value)
-}
+const urlService = new TransactionUrlService(router, route)
+const currentMonth = urlService.getCurrentMonth()
 
-const handleViewModeChange = async () => {
-  await store.toggleViewMode(currentMonth.value)
-}
+const handleMonthChange = () => urlService.handleMonthChange(currentMonth.value)
+const handleViewModeChange = () => urlService.handleViewModeChange()
 
-onMounted(async () => {
-  await Promise.all([
-    store.fetchCategories(),
-    store.refreshData(currentMonth.value)
-  ])
-})
+watch(() => route.query, (newQuery) => urlService.handleUrlChange(newQuery as Record<string, string>))
+
+onMounted(() => urlService.initialize())
 </script>

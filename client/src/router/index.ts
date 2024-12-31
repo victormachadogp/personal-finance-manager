@@ -8,6 +8,10 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
+      props: (route) => ({
+        initialMonth: route.query.month,
+        initialShowAll: route.query.showAll === 'true',
+      }),
     },
     {
       path: '/about',
