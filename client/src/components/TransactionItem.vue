@@ -26,15 +26,20 @@
       </div>
       
       <div class="ml-auto text-xs font-medium">
-        {{ formatAmount(transaction.amount) }}
+        {{ currencySymbol }}{{ transaction.amount }}
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, inject } from 'vue'
+import { ref, onMounted, onBeforeUnmount, inject } from 'vue'
 import type { Transaction, Category } from '../types/Transaction'
+import { useAccountStore } from '../stores/accountStore'
+
+const accountStore = useAccountStore()
+
+const currencySymbol = accountStore.selectedCurrency?.symbol || ''
 
 const props = defineProps<{
   transaction: Transaction
@@ -64,16 +69,10 @@ const hideTooltip = () => {
 
 onMounted(() => {
   window.addEventListener('resize', checkIfTruncated)
+
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', checkIfTruncated)
 })
-
-const formatAmount = (amount: number): string => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  }).format(amount)
-}
 </script>

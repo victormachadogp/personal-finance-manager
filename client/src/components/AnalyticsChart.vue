@@ -8,20 +8,17 @@
   import { computed } from 'vue'
   import Chart from 'primevue/chart'
   import type { AnalyticsSummary } from '../types/Analytics'
+  import { useAccountStore } from '../stores/accountStore'
+
+  const accountStore = useAccountStore()
+
+  const currencySymbol = accountStore.selectedCurrency?.symbol || ''
   
   interface Props {
     summary: AnalyticsSummary
   }
   
   const props = defineProps<Props>()
-  
-  const formatAmount = (amount: number): string => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP',
-      minimumFractionDigits: 2
-    }).format(amount)
-  }
   
   const chartData = computed(() => {
     return {
@@ -33,6 +30,12 @@
       }]
     }
   })
+
+  const formatPercentage = (value: number, total: number): string => {
+  const percentage = (value / total * 100).toFixed(1)
+  return `${percentage}%`
+}
+
   
   const chartOptions = {
     plugins: {
@@ -40,14 +43,18 @@
         display: false,        
       },
       tooltip: {
-        callbacks: {
-          label: (context) => {
-            const value = context.raw as number
-            return `${context.label}: ${formatAmount(value)}`
-          }
+      callbacks: {
+        label: (context) => {
+          const value = context.raw as number
+          const percentage = formatPercentage(value, props.summary.total)
+          return [
+            `${context.label}:`,
+            `${currencySymbol + value} (${percentage})`
+          ]
         }
       }
-    },
+    }
+  },
     responsive: true,
     maintainAspectRatio: true
   }

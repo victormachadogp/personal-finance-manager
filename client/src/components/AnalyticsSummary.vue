@@ -27,7 +27,7 @@
 
       <div class="flex justify-between text-xs font-medium border-t mt-4 pt-3">
         <span>Total</span>
-        <span>{{ formatAmount(store.analyticsSummary.total) }}</span>
+        <span>{{ currencySymbol }}{{ store.analyticsSummary.total }}</span>
       </div>
       <AnalyticsChart 
         v-if="isChartVisible"
@@ -40,24 +40,21 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useTransactionStore } from '../stores/transactionStore'
+import { useAccountStore } from '../stores/accountStore'
 import AnalyticsItem from './AnalyticsItem.vue'
 import AnalyticsChart from './AnalyticsChart.vue'
 import ChartIcon from './icons/ChartIcon.vue'
 
 const store = useTransactionStore()
+const accountStore = useAccountStore()
 const isChartVisible = ref(false)
 
 const toggleChart = () => {
   isChartVisible.value = !isChartVisible.value
 }
 
-const formatAmount = (amount: number): string => {
-  return new Intl.NumberFormat('en-GB', {
-    style: 'currency',
-    currency: 'GBP',
-    minimumFractionDigits: 2
-  }).format(amount)
-}
+const currencySymbol = accountStore.selectedCurrency?.symbol || ''
+
 
 onMounted(async () => {
   await store.fetchCategories()

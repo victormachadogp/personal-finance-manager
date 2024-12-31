@@ -18,10 +18,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, provide } from 'vue'
-
+import { ref, provide, onMounted } from 'vue'
+import { useAccountStore } from './stores/accountStore'
 import { RouterLink, RouterView } from 'vue-router'
 import ToolTip from './components/ToolTip.vue'
+
+const accountStore = useAccountStore()
+
 
 const tooltipRef = ref()
 
@@ -31,6 +34,10 @@ provide('showGlobalTooltip', (text: string, element: HTMLElement) => {
 
 provide('hideGlobalTooltip', () => {
   tooltipRef.value?.hide()
+})
+
+onMounted(async () => {
+  await accountStore.fetchAccounts()
 })
 </script>
 
