@@ -11,15 +11,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ArrowLeft from './icons/ArrowLeft.vue'
 import ArrowRight from './icons/ArrowRight.vue'
+import { TransactionUrlService } from '../services/transactionUrlService'
 
 const route = useRoute()
 const router = useRouter()
 
-const currentMonth = ref<string>(route.query.month as string || new Date().toISOString().slice(0, 7))
+const urlService = new TransactionUrlService(router, route)
+const currentMonth = urlService.getCurrentMonth()
 
 const formattedMonth = computed(() => {
   const [year, month] = currentMonth.value.split('-')
