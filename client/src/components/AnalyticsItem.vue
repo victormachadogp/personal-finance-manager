@@ -17,23 +17,20 @@
       ></div>
     </div>
     <div>
-      <span class="text-xs flex">{{ formatAmount(item.total) }}</span>
+      <span class="text-xs flex">{{ currencySymbol }}{{ item.total }}</span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { AnalyticsItem } from '../types/Analytics'
+import { useAccountStore } from '../stores/accountStore'
+
+const accountStore = useAccountStore()
+
+const currencySymbol = accountStore.selectedCurrency?.symbol || ''
 
 const props = defineProps<{
   item: AnalyticsItem
 }>()
-
-const formatAmount = (amount: number): string => {
-  return new Intl.NumberFormat('en-GB', {
-    style: 'currency',
-    currency: 'GBP',
-    minimumFractionDigits: 2
-  }).format(amount)
-}
 </script>
