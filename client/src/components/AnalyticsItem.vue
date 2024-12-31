@@ -17,7 +17,7 @@
       ></div>
     </div>
     <div>
-      <span class="text-xs flex">{{ currencySymbol }}{{ item.total }}</span>
+      <span class="text-xs flex">{{ accountStore.formatCurrency(item.total) }}</span>
     </div>
   </div>
 </template>
@@ -27,8 +27,6 @@ import type { AnalyticsItem } from '../types/Analytics'
 import { useAccountStore } from '../stores/accountStore'
 
 const accountStore = useAccountStore()
-
-const currencySymbol = accountStore.selectedCurrency?.symbol || ''
 
 const props = defineProps<{
   item: AnalyticsItem

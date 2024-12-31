@@ -27,7 +27,7 @@
 
       <div class="flex justify-between text-xs font-medium border-t mt-4 pt-3">
         <span>Total</span>
-        <span>{{ currencySymbol }}{{ store.analyticsSummary.total }}</span>
+        <span>{{ accountStore.formatCurrency(store.analyticsSummary.total) }}</span>
       </div>
       <AnalyticsChart 
         v-if="isChartVisible"
@@ -52,9 +52,6 @@ const isChartVisible = ref(false)
 const toggleChart = () => {
   isChartVisible.value = !isChartVisible.value
 }
-
-const currencySymbol = accountStore.selectedCurrency?.symbol || ''
-
 
 onMounted(async () => {
   await store.fetchCategories()

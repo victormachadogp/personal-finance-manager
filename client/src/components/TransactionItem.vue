@@ -26,7 +26,7 @@
       </div>
       
       <div class="ml-auto text-xs font-medium">
-        {{ currencySymbol }}{{ transaction.amount }}
+        {{ accountStore.formatCurrency(transaction.amount) }}
       </div>
     </div>
   </div>
@@ -38,8 +38,6 @@ import type { Transaction, Category } from '../types/Transaction'
 import { useAccountStore } from '../stores/accountStore'
 
 const accountStore = useAccountStore()
-
-const currencySymbol = accountStore.selectedCurrency?.symbol || ''
 
 const props = defineProps<{
   transaction: Transaction
