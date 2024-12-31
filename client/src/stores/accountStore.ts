@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const BASE_URL = import.meta.env.VITE_API_URL
 
@@ -20,6 +20,17 @@ export const useAccountStore = defineStore('account', () => {
   const accounts = ref<Account[]>([])
   const selectedCurrency = ref<Currency | null>(null)
 
+  const formatter = computed(() => {
+    return new Intl.NumberFormat('en-GB', {
+      style: 'currency',
+      currency: selectedCurrency.value?.code || 'USD',
+    })
+  })
+
+  const formatCurrency = (amount: number) => {
+    return formatter.value.format(amount)
+  }
+
   const fetchAccounts = async () => {
     try {
       const response = await fetch(`${BASE_URL}/accounts`)
@@ -35,5 +46,6 @@ export const useAccountStore = defineStore('account', () => {
   return {
     selectedCurrency,
     fetchAccounts,
+    formatCurrency,
   }
 })

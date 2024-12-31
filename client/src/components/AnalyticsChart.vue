@@ -11,8 +11,6 @@
   import { useAccountStore } from '../stores/accountStore'
 
   const accountStore = useAccountStore()
-
-  const currencySymbol = accountStore.selectedCurrency?.symbol || ''
   
   interface Props {
     summary: AnalyticsSummary
@@ -49,7 +47,7 @@
           const percentage = formatPercentage(value, props.summary.total)
           return [
             `${context.label}:`,
-            `${currencySymbol + value} (${percentage})`
+            `${accountStore.formatCurrency(value)} (${percentage})`
           ]
         }
       }
