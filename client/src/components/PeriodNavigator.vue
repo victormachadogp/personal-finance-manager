@@ -19,32 +19,24 @@ import ArrowRight from './icons/ArrowRight.vue'
 const route = useRoute()
 const router = useRouter()
 
-const currentMonth = ref(new Date())
-
-const monthParam = route.query.month as string | undefined
-if (monthParam) {
-  currentMonth.value = new Date(monthParam + '-01')
-}
+const currentMonth = ref<string>(route.query.month as string || new Date().toISOString().slice(0, 7))
 
 const formattedMonth = computed(() => {
-  return currentMonth.value.toLocaleString('default', { month: 'long', year: 'numeric' })
+  const [year, month] = currentMonth.value.split('-')
+  return new Date(Number(year), Number(month) - 1).toLocaleString('default', { month: 'long', year: 'numeric' })
 })
 
 const navigate = (direction: number) => {
-  currentMonth.value.setMonth(currentMonth.value.getMonth() + direction)
-  const newMonth = currentMonth.value.toISOString().slice(0, 7)
-  router.push({ query: { ...route.query, month: newMonth } })
+  const [year, month] = currentMonth.value.split('-').map(Number)
+  const newDate = new Date(year, month - 1 + direction)
+  currentMonth.value = newDate.toISOString().slice(0, 7)
+  router.push({ query: { ...route.query, month: currentMonth.value } })
 }
 
 // Watch for changes in the route query parameter and update currentMonth accordingly
-watch(
-  () => route.query.month,
-  (newMonth) => {
-    if (newMonth) {
-      currentMonth.value = new Date(newMonth + '-01')
-    }
-  }
-)
+watch(() => route.query.month, (newMonth) => {
+  if (newMonth) currentMonth.value = newMonth as string
+})
 </script>
 
 <style scoped></style>
