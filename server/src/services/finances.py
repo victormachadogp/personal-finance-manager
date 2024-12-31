@@ -3,7 +3,7 @@ import io
 from pydantic import BaseModel
 from sqlmodel import SQLModel, Session, not_, select
 from src import base_categories
-from src.dtos import ColumnMapper, MonthYear
+from src.dtos import ColumnMapper, MonthYear, UpdateTransaction
 from src.models import Account, Category, Transaction
 from datetime import datetime
 from decimal import Decimal
@@ -13,6 +13,7 @@ from sqlmodel.sql.expression import Select
 from sqlalchemy.orm import joinedload
 
 from src.services.categorization import CategorizationService
+from src.services.exceptions import ObjectNotFoundException
 
 
 """
@@ -90,6 +91,27 @@ class FinanceService:
             statement = statement.where(Transaction.category_id == category_id)
 
         return self.session.exec(statement).all()
+
+    def get_transaction(self, id: str) -> Transaction:
+        transaction = self.session.get(Transaction, id)
+        if not transaction:
+            raise ObjectNotFoundException(f"Transaction with id {id} not found")
+        return transaction
+
+    def update_transaction(self, transaction_id: str, update_transaction: UpdateTransaction) -> Transaction:
+        transaction = self.session.get(Transaction, transaction_id)
+        if not transaction:
+            raise ObjectNotFoundException(f"Transaction with id {transaction_id} not found")
+
+        if "category_id" in update_transaction.model_fields_set:
+            transaction.category_id = update_transaction.category_id
+        if update_transaction.exclude_from_analytics is not None:
+            transaction.exclude_from_analytics = update_transaction.exclude_from_analytics
+
+        self.session.add(transaction)
+        self.session.commit()
+        self.session.refresh(transaction)
+        return transaction
 
     def get_categories(self) -> Sequence[Category]:
         return self.session.exec(select(Category)).all()
