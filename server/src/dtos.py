@@ -18,3 +18,8 @@ class ColumnMapper(BaseModel):
     # convert date, description, amount, category to lowercase
     def __init__(self, **data):
         super().__init__(**{k: v.lower() if isinstance(v, str) and k != "date_format" else v for k, v in data.items()})
+
+
+class UpdateTransaction(BaseModel):
+    category_id: Optional[str] = None
+    exclude_from_analytics: Optional[bool] = None

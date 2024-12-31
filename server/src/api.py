@@ -1,7 +1,7 @@
 from typing import Optional, Sequence
 from fastapi import APIRouter, Depends, File, Form, Query, UploadFile
 from pydantic import BaseModel
-from src.dtos import ColumnMapper, MonthYear
+from src.dtos import ColumnMapper, MonthYear, UpdateTransaction
 from src.models import Category, Transaction
 from src.services.finances import CategoryAnalyticsRespose, FinanceService
 from src.dependencies import finance_service
@@ -31,6 +31,16 @@ def get_transactions(
     month_filter = to_month_year(month)
     transactions = finance_service.get_transactions(month=month_filter, category_id=category_id)
     return transactions
+
+
+@router.patch("/transactions/{transaction_id}")
+def update_transaction(
+    transaction_id: str,
+    update_transaction: UpdateTransaction,
+    finance_service: FinanceService = Depends(finance_service),
+) -> Transaction:
+    transaction = finance_service.update_transaction(transaction_id, update_transaction)
+    return transaction
 
 
 @router.get("/categories")

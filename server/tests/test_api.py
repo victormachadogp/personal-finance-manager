@@ -67,3 +67,23 @@ def test_get_transactions_by_category_id(client: TestClient, account: Account, d
     transactions = response.json()
     assert len(transactions) == 1
     assert transactions[0]["category_id"] == cat1.id
+
+
+def test_update_transaction(client: TestClient, account: Account, db_session: Session):
+    """GIVEN a transaction"""
+    finance_service = FinanceService(db_session)
+    cat1 = finance_service.create_category(title="Cat1", icon="bookmark")
+    transaction = finance_service.create_transaction(
+        date=datetime.now(), description="Test1", amount=Decimal(10), category_id=cat1.id, account_id=account.id
+    )
+
+    """WHEN updating the transaction"""
+    cat2 = finance_service.create_category(title="Cat2", icon="bookmark")
+    response = client.patch(f"/transactions/{transaction.id}", json={"category_id": cat2.id})
+
+    """THEN the transaction should be updated"""
+    assert response.status_code == 200
+    assert response.json()["category_id"] == cat2.id
+
+    updated_transaction = finance_service.get_transaction(transaction.id)
+    assert updated_transaction.category_id == cat2.id

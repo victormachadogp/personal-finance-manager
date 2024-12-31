@@ -1,4 +1,3 @@
-from sqlalchemy import text
 from sqlmodel import create_engine, Session, SQLModel
 
 from src import base_categories
@@ -8,13 +7,17 @@ from src.models import Currency
 def get_engine():
     engine = create_engine("sqlite:///finance-manager.db")
     SQLModel.metadata.create_all(engine, checkfirst=True)
+    with engine.connect() as connection:
+        # Enable foreign key constraints. Ensure it’s set once for all sessions
+        connection.exec_driver_sql("PRAGMA foreign_keys = ON;")
     return engine
 
 
 def get_session(engine):
+    # https://sqlmodel.tiangolo.com/tutorial/fastapi/session-with-dependency/#create-a-fastapi-dependency
     with Session(engine) as session:
-        session.exec(text("PRAGMA foreign_keys = ON;"))  # Enable foreign key constraints
         return session
+
 
 
 def seed_db():

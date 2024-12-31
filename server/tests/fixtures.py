@@ -34,6 +34,7 @@ def db_session(engine: Engine):
     yield session
 
 
+
 @pytest.fixture
 def account(db_session: Session) -> Account:
     service = FinanceService(db_session)
@@ -42,10 +43,10 @@ def account(db_session: Session) -> Account:
 
 
 @pytest.fixture
-def client(engine: Engine) -> TestClient:
+def client(engine: Engine, db_session: Session) -> TestClient:
     from src.main import app
 
-    app.dependency_overrides[dependencies.engine] = lambda: engine
+    app.dependency_overrides[dependencies.get_session] = lambda: db_session
 
     return TestClient(app)
 
