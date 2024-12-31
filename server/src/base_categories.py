@@ -33,7 +33,6 @@ all_categories = [
     CHARITY,
     PERSONAL_CARE,
     BUSINESS,
-    FAMILY,
     EDUCATION,
     INVESTMENTS,
     HOLIDAYS,
