@@ -27,8 +27,8 @@ class Merchant(SQLModel, table=True):
 class Currency(SQLModel, table=True):
     id: str = Field(..., primary_key=True)
     name: str = Field(index=True)
-    code: str
     symbol: str
+    bcp_47_lang_tag: str
 
     accounts: list["Account"] = Relationship(back_populates="currency")
 
@@ -55,7 +55,7 @@ class Transaction(SQLModel, table=True):
     category_id: Optional[str] = Field(default=None, foreign_key="category.id")
     merchant_id: Optional[str] = Field(default=None, foreign_key="merchant.id")
     account_id: str = Field(foreign_key="account.id")
-    exclude_from_analytics: bool = Field(default=False)  # Stop it from being counted towards your spending (e.g. transfers between accounts)
+    exclude_from_analytics: bool = Field(default=False) # Stop it from being counted towards your spending (e.g. transfers between accounts)
 
     # type_: TransactionType
     # category: Category = Relationship(back_populates="transactions")
