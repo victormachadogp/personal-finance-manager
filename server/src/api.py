@@ -61,8 +61,8 @@ def get_analytics(
 class CurrencySchema(BaseModel):
     id: str
     name: str
-    code: str
     symbol: str
+    bcp_47_lang_tag: str
     model_config = {"from_attributes": True}
 
 
