@@ -9,10 +9,10 @@
     </div>
     <div v-if="store.isLoading" class="loading">Loading...</div>
     <div v-else-if="store.error" class="error">{{ store.error }}</div>
-    <div v-else-if="store.analyticsSummary" class="bg-white flex flex-col px-7 pb-8 pt-4 gap-2 rounded-[0.3rem]">      
+    <div v-else-if="store.analyticsSummary" class="bg-white flex flex-col px-7 pb-8 pt-4 gap-2 rounded-[0.3rem]">
       <div class="flex justify-end mb-4">
-        <button 
-          @click="toggleChart" 
+        <button
+          @click="toggleChart"
           class="hover:opacity-70 transition-opacity"
         >
         <ChartIcon class="w-5 h-5" />
@@ -29,9 +29,9 @@
         <span>Total</span>
         <span>{{ accountStore.formatCurrency(store.analyticsSummary.total) }}</span>
       </div>
-      <AnalyticsChart 
+      <AnalyticsChart
         v-if="isChartVisible"
-        :summary="store.analyticsSummary" 
+        :summary="store.analyticsSummary"
       />
     </div>
   </div>
@@ -47,7 +47,7 @@ import ChartIcon from './icons/ChartIcon.vue'
 
 const store = useTransactionStore()
 const accountStore = useAccountStore()
-const isChartVisible = ref(false)
+const isChartVisible = ref(true)
 
 const toggleChart = () => {
   isChartVisible.value = !isChartVisible.value
