@@ -6,8 +6,8 @@ const BASE_URL = import.meta.env.VITE_API_URL
 interface Currency {
   id: string
   name: string
-  code: string
   symbol: string
+  bcp_47_lang_tag: string
 }
 
 interface Account {
@@ -20,10 +20,21 @@ export const useAccountStore = defineStore('account', () => {
   const accounts = ref<Account[]>([])
   const selectedCurrency = ref<Currency | null>(null)
 
+  const getCurrencyCode = (currencyId: string): string => {
+    return currencyId.toUpperCase()
+  }
+
   const formatter = computed(() => {
-    return new Intl.NumberFormat('en-GB', {
+    if (!selectedCurrency.value) {
+      return new Intl.NumberFormat('en-GB', {
+        style: 'currency',
+        currency: 'GBP',
+      })
+    }
+
+    return new Intl.NumberFormat(selectedCurrency.value.bcp_47_lang_tag, {
       style: 'currency',
-      currency: selectedCurrency.value?.code || 'USD',
+      currency: getCurrencyCode(selectedCurrency.value.id),
     })
   })
 
@@ -44,6 +55,7 @@ export const useAccountStore = defineStore('account', () => {
   }
 
   return {
+    accounts,
     selectedCurrency,
     fetchAccounts,
     formatCurrency,
