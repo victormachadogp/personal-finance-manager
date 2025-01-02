@@ -2,14 +2,14 @@
   <div class="transaction">
     <div class="flex items-center relative">
       <div class="flex items-center gap-2 flex-1 whitespace-nowrap max-w-[50%]">
-        <h4 
+        <span
           ref="descriptionEl"
           class="text-sm font-medium text-ellipsis overflow-hidden relative"
           @mouseenter="showTooltip"
           @mouseleave="hideTooltip"
         >
           {{ transaction.description }}
-        </h4>
+        </span>
         <span v-if="transaction.notes" class="text-xs text-[#8E8E93]">
           {{ transaction.notes }}
         </span>
