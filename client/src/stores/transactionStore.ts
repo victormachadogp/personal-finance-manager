@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
+import { TransactionService } from '../services/transactionService'
 import type { Transaction, Category } from '../types/Transaction'
 import type { AnalyticsResponse, AnalyticsSummary, AnalyticsItem } from '../types/Analytics'
-
-const BASE_URL = import.meta.env.VITE_API_URL
 
 export const useTransactionStore = defineStore('transaction', {
   state: () => ({
@@ -61,16 +60,16 @@ export const useTransactionStore = defineStore('transaction', {
   },
 
   actions: {
-    async fetchTransactions(month?: string) {
+    async fetchTransactions(transactionService: TransactionService, month?: string) {
       this.isLoading = true
       try {
-        const url = new URL(`${BASE_URL}/transactions`)
+        this.transactions = await transactionService.fetchTransactions(
+          month,
+          this.showAllTransactions,
+        )
         if (month && !this.showAllTransactions) {
-          url.searchParams.append('month', month)
           this.selectedMonth = month
         }
-        const response = await fetch(url)
-        this.transactions = await response.json()
         this.error = null
       } catch (e) {
         this.error = 'Failed to fetch transactions'
@@ -79,10 +78,9 @@ export const useTransactionStore = defineStore('transaction', {
       }
     },
 
-    async fetchCategories() {
+    async fetchCategories(transactionService: TransactionService) {
       try {
-        const response = await fetch(`${BASE_URL}/categories`)
-        const categoriesList = await response.json()
+        const categoriesList = await transactionService.fetchCategories()
         this.categoryMap = new Map(categoriesList.map((category) => [category.id, category]))
         this.error = null
       } catch (e) {
@@ -90,27 +88,27 @@ export const useTransactionStore = defineStore('transaction', {
       }
     },
 
-    async fetchAnalytics(month?: string) {
+    async fetchAnalytics(transactionService: TransactionService, month?: string) {
       try {
-        const url = new URL(`${BASE_URL}/categories/analytics`)
-        if (month && !this.showAllTransactions) {
-          url.searchParams.append('month', month)
-        }
-        const response = await fetch(url)
-        this.analyticsData = await response.json()
+        this.analyticsData = await transactionService.fetchAnalytics(
+          month,
+          this.showAllTransactions,
+        )
         this.error = null
       } catch (e) {
         this.error = 'Failed to fetch analytics'
       }
     },
 
-    async toggleViewMode(month?: string) {
-      this.showAllTransactions = !this.showAllTransactions
-      await Promise.all([this.fetchTransactions(month), this.fetchAnalytics(month)])
+    setShowAllTransactions(value: boolean) {
+      this.showAllTransactions = value
     },
 
-    async refreshData(month?: string) {
-      await Promise.all([this.fetchTransactions(month), this.fetchAnalytics(month)])
+    async refreshData(transactionService: TransactionService, month?: string) {
+      await Promise.all([
+        this.fetchTransactions(transactionService, month),
+        this.fetchAnalytics(transactionService, month),
+      ])
     },
   },
 })
