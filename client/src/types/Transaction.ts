@@ -12,3 +12,9 @@ export interface Category {
   title: string
   color: string
 }
+export interface TransactionState {
+  showAllTransactions: boolean
+  currentMonth: string
+  isLoading: boolean
+  error: string | null
+}
