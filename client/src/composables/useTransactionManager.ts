@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { TransactionService } from '../services/transactionService'
+import { inject } from 'vue'
+import { TransactionServiceKey } from '../plugins/serviceProvider'
 import { UrlService } from '../services/urlService'
 import { useTransactionStore } from '../stores/transactionStore'
 
@@ -8,9 +9,14 @@ export function useTransactionManager() {
   const router = useRouter()
   const route = useRoute()
   const store = useTransactionStore()
-  const transactionService = new TransactionService()
-  const urlService = new UrlService(router, route)
 
+  // Inject the transaction service using the key
+  const transactionService = inject(TransactionServiceKey)
+  if (!transactionService) {
+    throw new Error('TransactionService not provided')
+  }
+
+  const urlService = new UrlService(router, route)
   const currentMonth = ref(new Date().toISOString().slice(0, 7))
 
   const initialize = async () => {
@@ -57,11 +63,16 @@ export function useTransactionManager() {
     await store.refreshData(transactionService, newMonth)
   }
 
+  const refreshData = async () => {
+    await store.refreshData(transactionService, currentMonth.value)
+  }
+
   return {
     currentMonth,
     initialize,
     handleMonthChange,
     handleViewModeChange,
     handleUrlChange,
+    refreshData,
   }
 }
